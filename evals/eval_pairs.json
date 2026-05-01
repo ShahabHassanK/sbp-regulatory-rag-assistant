@@ -1,0 +1,578 @@
+[
+  {
+    "question": "What happens when no interest rate is specified in an instrument?",
+    "ground_truth": "Interest is calculated at 6% per annum from the due date."
+  },
+  {
+    "question": "At what rate is interest calculated when no rate is specified?",
+    "ground_truth": "6 per centum per annum"
+  },
+  {
+    "question": "From which date is interest calculated when no rate is specified?",
+    "ground_truth": "The date at which the amount ought to have been paid by the party charged"
+  },
+  {
+    "question": "What is the maximum number of days a Banking Court can allow for adjournments, except in extraordinary circumstances?",
+    "ground_truth": "7"
+  },
+  {
+    "question": "What type of decree will the Banking Court pass for the enforcement of a mortgage of immovable property?",
+    "ground_truth": "Interim or final decree for foreclosure or sale"
+  },
+  {
+    "question": "How will the Banking Court treat an affidavit filed by a party in respect of the examination in chief of a witness who is not to be summoned through the Court?",
+    "ground_truth": "As examination in chief, allowing the contesting parties an opportunity for cross examination"
+  },
+  {
+    "question": "What happens when a customer is in default of their duty under subsection (1) of this Ordinance?",
+    "ground_truth": "A judgment is made against the customer, resulting in a decree for payment of the cost of funds as determined under subsection (2)."
+  },
+  {
+    "question": "Can other laws override the provisions of this Ordinance?",
+    "ground_truth": "No, the provisions of this Ordinance have effect notwithstanding anything inconsistent therewith contained in any other law for the time being in force."
+  },
+  {
+    "question": "In what year was the Financial Institutions (Recovery of Finances) (Amendment) Act added?",
+    "ground_truth": "2016"
+  },
+  {
+    "question": "What is the time period within which the Conciliation Committee must conclude the reference?",
+    "ground_truth": "thirty days of the commencement of the conciliation proceedings"
+  },
+  {
+    "question": "Under what conditions can the Chairman NAB tender a pardon to a person?",
+    "ground_truth": "on condition of his making a full and true disclosure of the whole of the circumstances within his knowledge relating to the said offence"
+  },
+  {
+    "question": "How many days does the Court have to accord approval for writing?",
+    "ground_truth": "seven days"
+  },
+  {
+    "question": "What is the title of the ordinance as per section 1?",
+    "ground_truth": "National Accountability Ordinance"
+  },
+  {
+    "question": "What is the section number that deals with the Power to freeze Property?",
+    "ground_truth": "12"
+  },
+  {
+    "question": "What is the process for a claim or objection against the freezing of property as per the ordinance?",
+    "ground_truth": "Section 13 provides the process for a claim or objection against freezing"
+  },
+  {
+    "question": "What does the expression 'at sight' mean in a promissory note?",
+    "ground_truth": "on demand"
+  },
+  {
+    "question": "How many expressions are defined in the given text?",
+    "ground_truth": "3"
+  },
+  {
+    "question": "What is the process for determining the meaning of 'after sight' in a bill of exchange?",
+    "ground_truth": "after presentment for sight"
+  },
+  {
+    "question": "What is the time frame for furnishing returns to the State Bank after the close of the period?",
+    "ground_truth": "within three months"
+  },
+  {
+    "question": "How many copies of the accounts and balance-sheet are to be furnished to the State Bank?",
+    "ground_truth": "three"
+  },
+  {
+    "question": "In what year was the Finance Act passed that inserted a provision related to the submission of returns?",
+    "ground_truth": "2007"
+  },
+  {
+    "question": "What is the time limit for the maturity of bills of exchange that can be purchased, sold, or rediscounted?",
+    "ground_truth": "one hundred and eighty days"
+  },
+  {
+    "question": "What type of banks are eligible to receive advances and loans from the Bank?",
+    "ground_truth": "scheduled banks or cooperative banks"
+  },
+  {
+    "question": "Against what type of security can advances and loans be made to scheduled banks or cooperative banks?",
+    "ground_truth": "stocks, funds, securities, gold, silver, documents of title, bills of exchange, promissory notes, and modaraba certificates"
+  },
+  {
+    "question": "In what year was the Pakistan Coinage Act brought into force?",
+    "ground_truth": "1906"
+  },
+  {
+    "question": "What is the number of the Gawadur ordinance that applied the Act in Gawadur?",
+    "ground_truth": "37 of 1960"
+  },
+  {
+    "question": "What is the process by which the Act was extended to the Leased Areas of Baluchistan?",
+    "ground_truth": "The Leased Areas(Laws) Order, 1950 (G.G.O. 3 of 1950)"
+  },
+  {
+    "question": "What is the minimum number of non-executive Board members required to constitute an audit committee?",
+    "ground_truth": "three"
+  },
+  {
+    "question": "What is the process for appointing a chief internal auditor?",
+    "ground_truth": "The Board designates and removes the chief internal auditor on recommendation of the audit committee"
+  },
+  {
+    "question": "How many calendar years must have passed since an external expert was a member of the Board or staff to be eligible for co-option to the audit committee?",
+    "ground_truth": "three"
+  },
+  {
+    "question": "What is the time frame for loans to be considered overdue and potentially published in a list?",
+    "ground_truth": "more than one year from the due date"
+  },
+  {
+    "question": "What is the purpose of the guidelines laid down by the State Bank under section 33B?",
+    "ground_truth": "facilitating recovery of bad or doubtful loans"
+  },
+  {
+    "question": "How often must banking companies prepare a balance sheet and profit and loss account?",
+    "ground_truth": "at the expiration of each calendar year"
+  },
+  {
+    "question": "What actions can the State Bank take while exercising its powers?",
+    "ground_truth": "The State Bank can engage independent attorneys, accountants, auditors, valuation experts and consultants at the expense of the banking company under Resolution."
+  },
+  {
+    "question": "What is the threshold for the State Bank to engage independent experts?",
+    "ground_truth": "There is no specific numerical threshold mentioned for the State Bank to engage independent experts."
+  },
+  {
+    "question": "What process does the State Bank follow to engage independent experts?",
+    "ground_truth": "The State Bank engages independent experts on such terms and conditions as may be specified by the State Bank."
+  },
+  {
+    "question": "Under what circumstances can the State Bank issue directions to microfinance institutions?",
+    "ground_truth": "in the public interest, to prevent detrimental conduct, in furtherance of monetary or financial sector policy, or to secure proper management"
+  },
+  {
+    "question": "What is the threshold for the State Bank to issue directions to microfinance institutions?",
+    "ground_truth": "when it is necessary"
+  },
+  {
+    "question": "What can the State Bank do to a direction issued under sub-section (1) and what conditions can it impose?",
+    "ground_truth": "modify or cancel the direction, and impose conditions subject to which the modification or cancellation shall have effect"
+  },
+  {
+    "question": "What is required for a person to be authorized to deal in foreign exchange?",
+    "ground_truth": "An application made to the State Bank"
+  },
+  {
+    "question": "What is the threshold for an authorised dealer to engage in a transaction involving any foreign currency without permission from the State Bank?",
+    "ground_truth": "There is no specific numerical threshold, permission from the State Bank is required"
+  },
+  {
+    "question": "What must an authorised dealer comply with in all dealings in foreign exchange?",
+    "ground_truth": "General or special directions or instructions given by the State Bank from time to time"
+  },
+  {
+    "question": "What is the effective date of the notification regarding the appointments to the Pakistan Banking Council?",
+    "ground_truth": "1st January, 1977"
+  },
+  {
+    "question": "How many new members are appointed to the Pakistan Banking Council according to the notification?",
+    "ground_truth": "3"
+  },
+  {
+    "question": "What position is Mr. M.A.K. Yousufi appointed to in the Pakistan Banking Council?",
+    "ground_truth": "Chairman"
+  },
+  {
+    "question": "What is the date of the notification issued by the Federal Government of Pakistan?",
+    "ground_truth": "18th December, 1975"
+  },
+  {
+    "question": "What is the serial number of the substituted entry in the Notification No. F. 3 (21)-IFI/74?",
+    "ground_truth": "3"
+  },
+  {
+    "question": "What position does Mr. Mohammad Nawaz Khan hold in the Ministry of Finance?",
+    "ground_truth": "Additional Secretary"
+  },
+  {
+    "question": "What are the genuine reasons for not using biometric verification in banks?",
+    "ground_truth": "NADRA system/data/connectivity or technical issue, NADRA does not have biometric records, customers with non-biometrically verifiable documents, permanent physical disability, or temporary issues"
+  },
+  {
+    "question": "Is biometric verification required for customers verified through NADRA Verisys?",
+    "ground_truth": "Yes, but only in case of temporary biometric connectivity or customer-related issues"
+  },
+  {
+    "question": "Can biometric verification be conducted outside of bank premises?",
+    "ground_truth": "Yes, at the bank's discretion, using mobile devices, while following regulatory requirements"
+  },
+  {
+    "question": "What should SBP REs do when their circumstances change or new threats emerge?",
+    "ground_truth": "Update their internal risk assessment"
+  },
+  {
+    "question": "How often should REs update their internal risk assessment document if the NRA is updated at the national level?",
+    "ground_truth": "Immediately in light of the updated NRA(s)"
+  },
+  {
+    "question": "What factors should SBP REs consider when assessing ML/TF/PF risks and devising mitigating measures?",
+    "ground_truth": "The nature, scale, diversity and complexity of their business, target markets, customer risk profile, and jurisdictions they are exposed to"
+  },
+  {
+    "question": "What department is responsible for banking policy and regulations in the context of Targeted Financial Sanctions?",
+    "ground_truth": "Banking Policy & Regulations Department"
+  },
+  {
+    "question": "Which bank has issued FAQs on Targeted Financial Sanctions obligations?",
+    "ground_truth": "State Bank of Pakistan"
+  },
+  {
+    "question": "How many departments are explicitly mentioned in the context of Targeted Financial Sanctions obligations?",
+    "ground_truth": "1"
+  },
+  {
+    "question": "What type of customers may be considered high-risk due to difficulty in monitoring the source and use of funds in their accounts?",
+    "ground_truth": "High net worth customers"
+  },
+  {
+    "question": "What is an example of a product or service that may be considered high-risk if requested by a customer?",
+    "ground_truth": "Cash intensive transactions"
+  },
+  {
+    "question": "Which organization identifies jurisdictions with inadequate AML/CFT measures?",
+    "ground_truth": "FATF"
+  },
+  {
+    "question": "What type of equipment is mentioned in the context of being shipped to a country with no electronics industry?",
+    "ground_truth": "Semiconductor manufacturing equipment"
+  },
+  {
+    "question": "What is an indicator of a possible shell company?",
+    "ground_truth": "Companies that do not have a high level of capitalization"
+  },
+  {
+    "question": "How many reports are referenced in the given text?",
+    "ground_truth": "3"
+  },
+  {
+    "question": "What is the responsibility of SBP REs in regards to wire transfers with institutions that do not comply with standard requirements?",
+    "ground_truth": "SBP REs shall limit or prohibit relationships or transactions with institutions that do not comply with the standard requirements for wire transfers."
+  },
+  {
+    "question": "What is the threshold for treating local banks as originators in foreign inward remittances?",
+    "ground_truth": "Local banks that provide agency services to MFBs under agreement shall be treated as originator."
+  },
+  {
+    "question": "What steps should SBP REs take when identifying cross-border wire transfers that lack required originator or beneficiary information?",
+    "ground_truth": "SBP REs should take reasonable measures to identify such transfers and have risk-based policies and procedures for determining when to execute, reject, or suspend the transfer."
+  },
+  {
+    "question": "What is the main purpose of AML/CFT/CPF regulations?",
+    "ground_truth": "The main purpose of AML/CFT/CPF regulations is to prevent and combat money laundering, financing of terrorism, and proliferation financing."
+  },
+  {
+    "question": "What is the date up to which the AML/CFT/CPF regulations for State Bank of Pakistan's regulated entities were updated?",
+    "ground_truth": "November 28, 2022"
+  },
+  {
+    "question": "What entities do the AML/CFT/CPF regulations apply to, according to the provided text?",
+    "ground_truth": "State Bank of Pakistan's regulated entities (SBP-REs)"
+  },
+  {
+    "question": "What is required to be completed by SBP REs before establishing a business relationship or conducting an occasional transaction?",
+    "ground_truth": "Verification of the identity of the customer, occasional customer and beneficial owner"
+  },
+  {
+    "question": "In which circumstances shall SBP REs apply Enhanced Due Diligence (EDD)?",
+    "ground_truth": "Business relationships and transactions with higher risks, with natural and legal persons from high-risk jurisdictions, and with PEPs and their close associates and family members"
+  },
+  {
+    "question": "What information may SBP REs obtain as part of Enhanced Due Diligence (EDD) measures?",
+    "ground_truth": "Additional information on the customer, such as occupation, volume of assets, and information available through public databases or the internet"
+  },
+  {
+    "question": "What is the purpose of the Annual Training Program for SBP REs?",
+    "ground_truth": "To ensure training sessions for Sponsor Shareholders, BoD, Senior Management, Line Management, and Field Staff in the area of AML/ CFT/ CPF"
+  },
+  {
+    "question": "How often should the Annual Training Program be developed and implemented?",
+    "ground_truth": "Annually"
+  },
+  {
+    "question": "What factors should the content of training and methodology used be updated with regard to?",
+    "ground_truth": "Emergent risks identified by SBP REs through IRAR, updates in National Risk Assessment threats and vulnerabilities, update in international standards and best practices, regulatory/supervisory updates, update in legal framework, issuance and sharing of guiding documents and analysis by government"
+  },
+  {
+    "question": "What is the definition of a Family member of a PEP?",
+    "ground_truth": "A spouse of the PEP, lineal descendants and ascendants of the PEP, and siblings of PEP."
+  },
+  {
+    "question": "What is the threshold for a Fund Transfer/ Wire Transfer to be considered under these regulations?",
+    "ground_truth": "No specific threshold is mentioned, as it applies to any transaction carried out by financial institutions on behalf of an originator person."
+  },
+  {
+    "question": "What documents are accepted as Identity Documents for Pakistani citizens?",
+    "ground_truth": "Valid CNIC/ SNIC/ NICOP/ SNICOP."
+  },
+  {
+    "question": "What year was the FATF Guidance on Proliferation Financing published?",
+    "ground_truth": "2018"
+  },
+  {
+    "question": "What type of financing activities may share similar traits with proliferation financing activities?",
+    "ground_truth": "Money laundering and terrorist financing activities"
+  },
+  {
+    "question": "What is one element that may indicate proliferation financing?",
+    "ground_truth": "Transaction involves person or entity in foreign country of proliferation concern"
+  },
+  {
+    "question": "What is the condition for an account/relationship to not be allowed in an abbreviated name?",
+    "ground_truth": "The entity has its complete non-abbreviated name in their constituent document."
+  },
+  {
+    "question": "Which section of the Act must SBP REs comply with at a minimum for all types of customers?",
+    "ground_truth": "Section 7A"
+  },
+  {
+    "question": "What factors determine the compliance requirements for SBP REs under Section 7A of the Act?",
+    "ground_truth": "Types of customers, financial services they offer, and geographical locations they operate in"
+  },
+  {
+    "question": "What is the primary purpose of UNSC Resolutions related to sanctions measures?",
+    "ground_truth": "To cover the widest possible range of individuals/entities to extensively cover funds for terrorist and proliferation financing and freeze them"
+  },
+  {
+    "question": "Can an individual be considered an associated individual under the Sanctions regime solely based on a familial/blood relationship with a designated/proscribed person?",
+    "ground_truth": "No"
+  },
+  {
+    "question": "What is required by Para 6 of Regulation-4 of SBP's AML/CFT/CPF Regulations for SBP REs to identify individuals and entities?",
+    "ground_truth": "To use risk screening databases, watch lists, publically known information or linkages on the basis of Government or regulatory sources, reliable media information, or regulated entity's own analysis"
+  },
+  {
+    "question": "What page number does Regulation-1 Risk Based Approach to AML/ CFT start on?",
+    "ground_truth": "9"
+  },
+  {
+    "question": "What is the regulation number for Correspondent Banking?",
+    "ground_truth": "Regulation–9"
+  },
+  {
+    "question": "On which page can the list of information required for customer identity be found?",
+    "ground_truth": "33"
+  },
+  {
+    "question": "What information must SBP REs include in the message or payment instruction for a wire transfer?",
+    "ground_truth": "Name of the originator, originator's account number or unique reference number, originator's applicable identity document number, name of the beneficiary, and beneficiary's applicable identity document number"
+  },
+  {
+    "question": "What is the responsibility of the ordering institution in a wire transfer, according to Regulation 2?",
+    "ground_truth": "To identify and verify the originator and obtain details of the beneficial owner(s) of funds"
+  },
+  {
+    "question": "In a batch file for cross-border wire transfers, what information is required for each originator?",
+    "ground_truth": "The originator's account number or unique transaction reference number"
+  },
+  {
+    "question": "What does the term 'Regulations' refer to in the context of SBP REs?",
+    "ground_truth": "The AML/CFT/CPF Regulations"
+  },
+  {
+    "question": "What is the minimum number of pages in the document that defines 'Respondent Bank'?",
+    "ground_truth": "7"
+  },
+  {
+    "question": "How is a 'Respondent Bank' defined in the regulations?",
+    "ground_truth": "A bank or financial institution outside Pakistan to whom correspondent banking services in Pakistan are provided and vice versa"
+  },
+  {
+    "question": "What is the lower limit for investment of banks/DFIs in shares/units of any single startup?",
+    "ground_truth": "5 percent of Tier-I Capital of the bank/DFI reported in preceding half-yearly reviewed / annual audited financial statements or Rs. 500 million"
+  },
+  {
+    "question": "What is the aggregate committed exposure limit for banks/DFIs for investment in Wheat?",
+    "ground_truth": "Rs. 250 million"
+  },
+  {
+    "question": "What factors must banks/DFIs consider when making equity investment decisions according to their approved policy?",
+    "ground_truth": "financial standing of the bank/DFI, aggregate investment portfolio, risk appetite and expected return, level of expertise, business strategy including exit strategy etc."
+  },
+  {
+    "question": "What is the time limit after the date of classification of financing for the benefit of FSV against NPLs to be available?",
+    "ground_truth": "05 years"
+  },
+  {
+    "question": "If the percentage of classified housing finance to total housing finance is 8%, what is the required general reserve as a percentage of active/performing housing finance portfolio?",
+    "ground_truth": "1.0"
+  },
+  {
+    "question": "For a 'Substandard' classification, what provisioning is required and what is the treatment of unrealized mark-up?",
+    "ground_truth": "Provision of 25% of the difference resulting from the outstanding balance of principal less the amount of liquid assets realizable without recourse to a Court of Law and Forced Sale Value (FSV) of mortgaged properties to the extent of 75% of such FSV; Unrealized mark-up to be kept in Memorandum Account and not to be credited to Income Account except when realized in cash"
+  },
+  {
+    "question": "What is the aggregate amount of large exposures of a bank/DFI allowed at any point in time?",
+    "ground_truth": "50% of its total fund based and non-fund based exposure"
+  },
+  {
+    "question": "As of December 31, 2013, what is the total exposure limit as a percentage of a bank's/DFI's equity for a single obligor?",
+    "ground_truth": "25"
+  },
+  {
+    "question": "How should banks/DFIs calculate the large exposure limits?",
+    "ground_truth": "By following guidelines given at Para 1(a) to 1(c) of Annexure-I of PRs for Corporate / Commercial Banking"
+  },
+  {
+    "question": "What is the maximum size for microenterprise loans to a single project or business?",
+    "ground_truth": "Rs. 5,000,000/-"
+  },
+  {
+    "question": "What is the maximum annual income threshold for a poor person to be eligible for a General loan?",
+    "ground_truth": "Rs. 1,500,000/-"
+  },
+  {
+    "question": "What is the process that MFBs must follow before extending microenterprise loans?",
+    "ground_truth": "Develop related institutional capacity, evaluate preparedness, and have a board-approved Microenterprise lending policy in place"
+  },
+  {
+    "question": "What are the components of a UTN?",
+    "ground_truth": "A combination of alpha initials of the company name, transaction number, and financial year"
+  },
+  {
+    "question": "Where will the UTN be centrally maintained for export of currencies?",
+    "ground_truth": "By the Company and issued by its Head Office"
+  },
+  {
+    "question": "How will foreign currency be counted and verified at the SBP-Customs Joint Booth?",
+    "ground_truth": "Opened and counted in the presence of the Company's representative and Customs Official and verified by SBP-BSC officials"
+  },
+  {
+    "question": "What is the minimum long-term rating required for NBFCs to be exempt from aggregate limits for unsecured exposure?",
+    "ground_truth": "A"
+  },
+  {
+    "question": "Can a bank make direct investment in unsecured, non-listed, and non-rated TFCs?",
+    "ground_truth": "No"
+  },
+  {
+    "question": "Are mutual funds that invest in Government Securities exempt from exposure limits under Regulation R-6?",
+    "ground_truth": "No"
+  },
+  {
+    "question": "What is the maximum loan size for which banks and DFIs have discretion to obtain insurance cover of hypothecated stock or other securities?",
+    "ground_truth": "Rs 2 million"
+  },
+  {
+    "question": "Who approves conventional or Shariah-compliant program-based products in a bank or DFI?",
+    "ground_truth": "The Chief Executive Officer"
+  },
+  {
+    "question": "What is required of banks and DFIs in terms of SME Specific Credit Policy preparation?",
+    "ground_truth": "They shall prepare a comprehensive SME Specific Credit Policy duly approved by their Board of Directors"
+  },
+  {
+    "question": "What type of organizational structures should the list of SMEs be divisible by?",
+    "ground_truth": "Proprietorships, partnerships, limited company etc."
+  },
+  {
+    "question": "What is the minimum number of delivery channels that banks & DFIs should explore for adopting advanced delivery channels?",
+    "ground_truth": "At least 2 (branchless banking, tele-marketing etc.)"
+  },
+  {
+    "question": "What information should be explicitly mentioned in the loan agreements by banks & DFIs?",
+    "ground_truth": "Pricing policy, including mark-up rates, processing & documentation fee, prepayment/ late-payment penalties etc."
+  },
+  {
+    "question": "What type of securities are eligible as collateral for the LOLR facility?",
+    "ground_truth": "Approved Securities, Collateralized Term Finance Certificates, Bonds, Sukuk, and other securities guaranteed by the Federal Government"
+  },
+  {
+    "question": "What is the minimum markup/profit rate for the LOLR facility?",
+    "ground_truth": "Equal to or above SBP's ceiling rate under Interest Rate Corridor"
+  },
+  {
+    "question": "What is the process for mitigating financial risk in the LOLR facility?",
+    "ground_truth": "Applying adequate haircuts on the value of collateral and obtaining a first charge on any collateral pledged or assigned to support the LOLR facility"
+  },
+  {
+    "question": "What is the threshold for classifying a loss in terms of overdue principal or interest?",
+    "ground_truth": "Two years or more from the due date"
+  },
+  {
+    "question": "How much of the Forced Sale Value (FSV) of mortgaged properties can be provisioned in the first and second year?",
+    "ground_truth": "75%"
+  },
+  {
+    "question": "What happens to the benefit of Forced Sale Value (FSV) against Non-Performing Loans (NPLs) after 5 years from the date of classification?",
+    "ground_truth": "It is no longer available"
+  },
+  {
+    "question": "What is the primary document required for a bank to avail the LOLR facility under section 17G of the SBP Act, 1956?",
+    "ground_truth": "A written request, duly signed by the bank’s Chief Executive Officer"
+  },
+  {
+    "question": "What is the role of the bank's Shariah Board in the Shariah Compliant-LOLR facility?",
+    "ground_truth": "The bank’s Shariah Board will actively monitor the facility for Shariah compliance throughout the LOLR facility period"
+  },
+  {
+    "question": "What information must be included in the written request for the LOLR facility?",
+    "ground_truth": "The required amount, reasons for needing the LOLR facility, steps taken to cope with liquidity pressures, list of assets as collateral and their value, and necessary information about the bank's financial position"
+  },
+  {
+    "question": "What is the frequency at which the ECIB/bureau report(s) will be obtained?",
+    "ground_truth": "at annual review date"
+  },
+  {
+    "question": "What should be given to any overdue as reported in the ECIB/bureau report(s)?",
+    "ground_truth": "due weightage"
+  },
+  {
+    "question": "Where is the legal opinion, whether internal or external, placed?",
+    "ground_truth": "on record"
+  },
+  {
+    "question": "What is the maximum clean exposure that banks/DFIs can take against an SME?",
+    "ground_truth": "PKR 50 million"
+  },
+  {
+    "question": "What is required from banks/DFIs when considering any credit proposal for SME financing?",
+    "ground_truth": "latest credit information report on their prospective borrower(s) from Electronic Credit Information Bureau (e-CIB) of SBP or any Credit Information Bureau licensed/regulated by SBP"
+  },
+  {
+    "question": "How should banks/DFIs manage risks associated with SME financing?",
+    "ground_truth": "by having robust risk management systems, infrastructure, and HR capacity to identify, assess and manage risks, with a senior dedicated resource reporting directly to Risk Head for risk assessment of SME financing"
+  },
+  {
+    "question": "What department is responsible for SME financing regulations in the State Bank of Pakistan?",
+    "ground_truth": "SME, Housing & Sustainable Finance Department"
+  },
+  {
+    "question": "What is the address of the SME, Housing & Sustainable Finance Department?",
+    "ground_truth": "I.I. Chundrigar Road, Karachi"
+  },
+  {
+    "question": "As of what date are the Prudential Regulations for Small & Medium Enterprises Financing updated?",
+    "ground_truth": "October 07, 2024"
+  },
+  {
+    "question": "What is the category of the project as per para 18 part A of the Prudential Regulations for Infrastructure Project Financing?",
+    "ground_truth": "As per para 18 part A of the Prudential Regulations for Infrastructure Project Financing"
+  },
+  {
+    "question": "What is the threshold for exposure as a percentage of bank/DFI equity?",
+    "ground_truth": "Refer to Regulation IPF.3.1.1 of Prudential Regulations for Infrastructure Project Financing"
+  },
+  {
+    "question": "What information is required if the interest rate is floating?",
+    "ground_truth": "Applicable base rate + margins"
+  },
+  {
+    "question": "What is the purpose of routing rupees through FCA?",
+    "ground_truth": "to maintain foreign exchange requirement"
+  },
+  {
+    "question": "What is the code for receipt on account of export of foreign currency?",
+    "ground_truth": "2620"
+  },
+  {
+    "question": "How are intercompany transactions adjusted in the context of foreign exchange?",
+    "ground_truth": "to consolidate the position through branch transactions adjustments"
+  }
+]

@@ -1,0 +1,52 @@
+# ── Secrets ────────────────────────────────────────────────────────────────
+.env
+
+# ── Python ─────────────────────────────────────────────────────────────────
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pdb
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# ── Virtual environments ────────────────────────────────────────────────────
+venv/
+.venv/
+env/
+api/.venv/
+
+# ── Generated / large data files ───────────────────────────────────────────
+data/processed/
+evals/results/
+logs/
+
+# ── Qdrant local storage (large binary) ────────────────────────────────────
+qdrant_storage/
+
+# ── Markdown files (exclude all EXCEPT README.md) ──────────────────────────
+*.md
+!README.md
+
+# ── Test / cache ───────────────────────────────────────────────────────────
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+coverage.xml
+
+# ── IDE ─────────────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+.claude/
+
+# ── OS ──────────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini

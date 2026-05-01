@@ -1,0 +1,36 @@
+embedding:
+  model: "all-mpnet-base-v2"   # sentence-transformers model, 768-dim, runs locally
+  dimensions: 768
+  batch_size: 64               # sentence-transformers handles large batches efficiently
+
+chunking:
+  chunk_size: 512
+  chunk_overlap: 64
+  min_chunk_length: 100
+
+retrieval:
+  bm25_top_k: 20
+  vector_top_k: 20
+  rerank_top_n: 5
+  rrf_k: 60
+
+qdrant:
+  path: "E:/qdrant_storage"
+  collections:
+    laws: "sbp_laws"
+    regulations: "sbp_regulations"
+    aml: "sbp_aml"
+
+llm:
+  model: "llama-3.3-70b-versatile"
+  max_tokens: 1024
+  temperature: 0.1
+
+evaluation:
+  n_eval_pairs: 50
+  judge_model: "gemini-1.5-flash-latest"
+  metrics:
+    - faithfulness
+    - answer_relevancy
+    - context_precision
+    - context_recall
