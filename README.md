@@ -4,6 +4,19 @@ A production-grade **Retrieval-Augmented Generation (RAG)** system built over 42
 
 ---
 
+## 📸 Application Screenshots
+
+### Landing Page
+![Landing Page](screenshots/landingpage.PNG)
+
+### Conversation Log 1
+![Conversation Log 1](screenshots/conversationlog1.PNG)
+
+### Conversation Log 2
+![Conversation Log 2](screenshots/conversationlog2.PNG)
+
+---
+
 ## Table of Contents
 
 1. [Architecture Overview](#architecture-overview)
