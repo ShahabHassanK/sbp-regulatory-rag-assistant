@@ -28,7 +28,7 @@ llm:
 
 evaluation:
   n_eval_pairs: 50
-  judge_model: "gemini-1.5-flash-latest"
+  judge_model: "gemini-2.5-flash"
   metrics:
     - faithfulness
     - answer_relevancy

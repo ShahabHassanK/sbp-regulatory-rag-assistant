@@ -1,52 +1,33 @@
-# ── Secrets ────────────────────────────────────────────────────────────────
+# Environment
 .env
+api/.venv/
+venv/
+.Python
 
-# ── Python ─────────────────────────────────────────────────────────────────
+# Python cache
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
-*.pdb
-.Python
-*.egg-info/
-dist/
-build/
-.eggs/
 
-# ── Virtual environments ────────────────────────────────────────────────────
-venv/
-.venv/
-env/
-api/.venv/
-
-# ── Generated / large data files ───────────────────────────────────────────
+# Generated data
 data/processed/
 evals/results/
+evals/eval_checkpoint.json
 logs/
 
-# ── Qdrant local storage (large binary) ────────────────────────────────────
-qdrant_storage/
-
-# ── Markdown files (exclude all EXCEPT README.md) ──────────────────────────
+# Markdown — ignore all except README.md
 *.md
 !README.md
 
-# ── Test / cache ───────────────────────────────────────────────────────────
-.pytest_cache/
-.mypy_cache/
-.ruff_cache/
-htmlcov/
-.coverage
-coverage.xml
-
-# ── IDE ─────────────────────────────────────────────────────────────────────
+# IDE
 .vscode/
 .idea/
 *.swp
-*.swo
-.claude/
 
-# ── OS ──────────────────────────────────────────────────────────────────────
+# OS
 .DS_Store
 Thumbs.db
-desktop.ini
+
+# Tools
+.claude/

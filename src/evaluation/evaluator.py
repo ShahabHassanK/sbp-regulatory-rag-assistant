@@ -129,8 +129,15 @@ def generate_eval_pairs(chunks: list[dict], n: int = 50) -> list[dict]:
 def _build_ragas_judges(cfg: dict):
     """Instantiate and return (judge_llm, judge_embeddings) for RAGAS.
 
-    Uses Gemini 1.5 Flash via langchain-google-genai to avoid self-grading
-    bias when the generator is Groq.
+    Uses Gemini Flash (model set in config) as judge to avoid self-grading
+    bias.  The ``_GeminiNoTemp`` subclass:
+      1. Strips the ``temperature`` kwarg (unsupported by google-generativeai
+         0.7.x's GenerativeServiceClient).
+      2. Enforces a **thread-safe rate limiter** that guarantees a minimum
+         13 s between consecutive calls — keeping throughput below the
+         free-tier cap of 5 RPM (= 12 s/req) with 1 s headroom.  This is
+         applied globally across all RAGAS worker threads via a class-level
+         lock + timestamp.
 
     Args:
         cfg: Loaded config dict.
@@ -138,17 +145,52 @@ def _build_ragas_judges(cfg: dict):
     Returns:
         Tuple of (LangchainLLMWrapper, LangchainEmbeddingsWrapper).
     """
+    import threading
     from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
     from ragas.llms import LangchainLLMWrapper
     from ragas.embeddings import LangchainEmbeddingsWrapper
 
     gemini_api_key = os.getenv("GEMINI_API_KEY", "")
 
+    # Free-tier limit for every Gemini model: 5 RPM = 12 s per request.
+    # We enforce 13 s minimum interval (1 s safety margin).
+    _RPM_INTERVAL = 13.0
+
+    class _GeminiNoTemp(ChatGoogleGenerativeAI):
+        """Gemini wrapper that strips temperature and enforces 5-RPM rate limit."""
+
+        _rate_lock: threading.Lock = threading.Lock()
+        _last_call_at: float = 0.0
+
+        def _wait_for_slot(self) -> None:
+            """Block until at least _RPM_INTERVAL seconds have passed since the
+            previous call.  Thread-safe via a class-level lock."""
+            with self.__class__._rate_lock:
+                elapsed = time.time() - self.__class__._last_call_at
+                remaining = _RPM_INTERVAL - elapsed
+                if remaining > 0:
+                    logger.debug(f"Rate-limiter: sleeping {remaining:.1f}s")
+                    time.sleep(remaining)
+                self.__class__._last_call_at = time.time()
+
+        def _generate(self, messages, stop=None, run_manager=None, **kwargs):
+            kwargs.pop("temperature", None)
+            self._wait_for_slot()
+            return super()._generate(
+                messages, stop=stop, run_manager=run_manager, **kwargs
+            )
+
+        async def _agenerate(self, messages, stop=None, run_manager=None, **kwargs):
+            kwargs.pop("temperature", None)
+            self._wait_for_slot()   # still blocks; RAGAS uses threads not asyncio
+            return await super()._agenerate(
+                messages, stop=stop, run_manager=run_manager, **kwargs
+            )
+
     judge_llm = LangchainLLMWrapper(
-        ChatGoogleGenerativeAI(
+        _GeminiNoTemp(
             model=cfg["evaluation"]["judge_model"],
             google_api_key=gemini_api_key,
-            convert_system_message_to_human=True,
         )
     )
     judge_embeddings = LangchainEmbeddingsWrapper(
@@ -193,51 +235,195 @@ def _build_metrics(judge_llm, judge_embeddings) -> list:
 # ---------------------------------------------------------------------------
 
 # ---------------------------------------------------------------------------
-# Gemini-based generation for eval (bypasses Groq TPM limits entirely)
+# Groq model auto-discovery + token-minimal eval generation
 # ---------------------------------------------------------------------------
 
-_GEMINI_EVAL_PROMPT = (
-    "You are a regulatory compliance assistant. Answer the question below "
-    "using ONLY the provided context. Cite sources inline. If the context "
-    "does not contain the answer, say so.\n\n"
-    "Context:\n{context}\n\nQuestion: {question}"
-)
+# Candidate models in preference order (each has its own daily TPD bucket).
+# We probe availability at startup and only use models that respond to a
+# 1-token test call — this avoids hard-coding names that get decommissioned.
+_EVAL_MODEL_CANDIDATES = [
+    "llama-3.3-70b-versatile",          # 100K TPD, high quality
+    "llama-3.1-8b-instant",             # 500K TPD, fast
+    "llama-3.3-70b-specdec",            # separate budget, speculative decoding
+    "llama3-groq-8b-8192-tool-use-preview",   # tool-use preview, separate budget
+    "llama3-groq-70b-8192-tool-use-preview",  # 70b tool-use, separate budget
+    "llama-3.2-11b-vision-preview",     # vision model, text still works
+    "llama-3.2-90b-vision-preview",     # largest vision, text still works
+]
+
+# Module-level cache: populated once per process by _discover_eval_models().
+_EVAL_MODEL_CACHE: list[str] | None = None
+
+
+def _discover_eval_models() -> list[str]:
+    """Auto-discover which Groq models are live and have remaining TPD budget.
+
+    Strategy:
+      1. Fetch the live model list from Groq's /models endpoint (avoids using
+         decommissioned names entirely).
+      2. Probe each candidate with a 1-token call:
+         - Success or RPM/TPM error  → model is active, keep it.
+         - TPD-exhausted error       → model active but budget empty; put last.
+         - Any other error           → skip (decommissioned or unavailable).
+      3. Cache the result for the rest of the process.
+
+    Returns:
+        Ordered list of model IDs to try for generation; working models first,
+        TPD-exhausted ones last as a last-resort fallback.
+    """
+    global _EVAL_MODEL_CACHE
+    if _EVAL_MODEL_CACHE is not None:
+        return _EVAL_MODEL_CACHE
+
+    from groq import Groq, RateLimitError
+
+    client = Groq(api_key=os.getenv("GROQ_API_KEY", ""))
+
+    # Step 1: fetch the live model roster from Groq's own API.
+    try:
+        api_model_ids = {m.id for m in client.models.list().data}
+        logger.info(f"Groq reports {len(api_model_ids)} live models")
+    except Exception as exc:
+        logger.warning(f"Could not fetch Groq model list ({exc}); using candidate list")
+        api_model_ids = set(_EVAL_MODEL_CANDIDATES)
+
+    # Intersect candidates with live roster, preserving preference order.
+    candidates = [m for m in _EVAL_MODEL_CANDIDATES if m in api_model_ids]
+    if not candidates:
+        logger.warning("No candidates in live roster — falling back to full candidate list")
+        candidates = list(_EVAL_MODEL_CANDIDATES)
+
+    # Step 2: probe each candidate.
+    working: list[str] = []
+    tpd_exhausted: list[str] = []
+
+    probe_msg = [{"role": "user", "content": "1"}]
+    for model in candidates:
+        try:
+            client.chat.completions.create(
+                model=model,
+                messages=probe_msg,
+                max_tokens=1,
+                temperature=0.0,
+            )
+            working.append(model)
+            logger.info(f"  ✓ {model} — ready")
+        except RateLimitError as exc:
+            err = str(exc).lower()
+            if "per day" in err or "tpd" in err:
+                # Budget empty but model is live — use as last resort.
+                logger.warning(f"  ! {model} — TPD exhausted (keeping as fallback)")
+                tpd_exhausted.append(model)
+            else:
+                # RPM/TPM at probe time means the model IS active right now.
+                logger.warning(f"  ~ {model} — RPM limited at probe, treating as working")
+                working.append(model)
+        except Exception as exc:
+            logger.warning(f"  ✗ {model} — unavailable ({type(exc).__name__})")
+
+    ordered = working + tpd_exhausted
+    if not ordered:
+        logger.error(
+            "No Groq models available for eval generation. "
+            "All candidates are decommissioned or unreachable."
+        )
+    else:
+        logger.info(f"Eval model order: {ordered}")
+
+    _EVAL_MODEL_CACHE = ordered
+    return ordered
 
 
 def _gemini_generate(question: str, chunks: list[dict]) -> str:
-    """Generate an answer with Gemini Flash from retrieved chunks.
+    """Generate a concise answer for RAGAS eval using available Groq models.
 
-    Gemini 1.5 Flash free tier: 15 RPM / 1M TPM — sufficient for 144 eval
-    pairs without throttling.
+    Uses auto-discovered models (probed once at startup). Context is
+    intentionally minimal — 2 chunks × 150 characters — to keep token
+    usage around 300 per question (~43K for all 144 questions), which fits
+    comfortably within the smallest free-tier daily budget (100K TPD).
+
+    Error handling:
+      - ``model_decommissioned``:  skip immediately (already filtered at probe,
+        but guard against mid-run deprecations).
+      - TPD exhausted:             skip to next model.
+      - RPM / TPM exceeded:        sleep 20 s then retry the same model once.
+      - Any other exception:       skip to next model.
 
     Args:
         question: The regulatory question.
         chunks: Retrieved chunk dicts with ``text`` and ``metadata`` keys.
 
     Returns:
-        Generated answer string.
+        Generated answer string, or empty string if every model fails.
     """
-    from groq import Groq
+    from groq import Groq, RateLimitError, BadRequestError
+
+    models = _discover_eval_models()
+    if not models:
+        return ""
 
     client = Groq(api_key=os.getenv("GROQ_API_KEY", ""))
-    context = "\n\n---\n\n".join(
-        f"[{i+1}] {c['metadata'].get('source_file', '?')} "
-        f"| p.{c['metadata'].get('page', '?')}\n{c['text']}"
-        for i, c in enumerate(chunks)
+
+    # Ultra-minimal context: top-2 chunks, 150 chars each.
+    # ~75 tokens input per chunk + ~50 token question + 100 output ≈ 300 tokens total.
+    top_chunks = chunks[:2]
+    context = "\n---\n".join(
+        f"[{c['metadata'].get('source_file', '?')} p.{c['metadata'].get('page', '?')}] "
+        f"{c['text'][:150]}"
+        for c in top_chunks
     )
-    resp = client.chat.completions.create(
-        model="llama-3.1-8b-instant",   # 131K TPM — no rate-limit issues
-        messages=[
-            {"role": "system", "content": (
-                "You are a regulatory compliance assistant. Answer using ONLY "
-                "the provided context. Cite sources inline."
-            )},
-            {"role": "user", "content": f"Context:\n{context}\n\nQuestion: {question}"},
-        ],
-        temperature=0.1,
-        max_tokens=400,
-    )
-    return resp.choices[0].message.content or ""
+    messages = [
+        {
+            "role": "user",
+            "content": (
+                f"Answer in 1–2 sentences using ONLY the context below.\n\n"
+                f"Context:\n{context}\n\n"
+                f"Question: {question}"
+            ),
+        }
+    ]
+
+    def _single_call(model: str) -> str:
+        resp = client.chat.completions.create(
+            model=model,
+            messages=messages,
+            temperature=0.0,
+            max_tokens=100,
+        )
+        return resp.choices[0].message.content or ""
+
+    for model in models:
+        try:
+            return _single_call(model)
+
+        except BadRequestError as exc:
+            # Catches model_decommissioned 400s that slipped past the probe.
+            if "decommissioned" in str(exc).lower():
+                logger.warning(f"  ✗ {model} decommissioned mid-run, skipping")
+            else:
+                logger.warning(f"  ✗ {model} bad request: {exc}")
+            continue
+
+        except RateLimitError as exc:
+            err = str(exc).lower()
+            if "per day" in err or "tpd" in err:
+                logger.warning(f"  ! {model} TPD exhausted mid-run, trying next")
+                continue
+            # RPM / TPM — short sleep then one retry on the same model.
+            wait = 20
+            logger.warning(f"  ~ {model} RPM/TPM limit, sleeping {wait}s then retrying")
+            time.sleep(wait)
+            try:
+                return _single_call(model)
+            except Exception:
+                continue
+
+        except Exception as exc:
+            logger.warning(f"  ✗ {model} unexpected error: {type(exc).__name__}: {exc}")
+            continue
+
+    logger.warning(f"All eval models failed for: '{question[:60]}'")
+    return ""
 
 
 def _api_query(question: str, doc_type: str | None = None) -> dict | None:
@@ -276,25 +462,39 @@ def _api_query(question: str, doc_type: str | None = None) -> dict | None:
         return None
 
 
-def run_ragas_eval(eval_pairs_path: Path = EVAL_PAIRS_PATH) -> dict:
-    """Run RAGAS evaluation using Gemini 1.5 Flash as the judge LLM.
+# Path where collected rows are cached so scoring can be re-run independently.
+EVAL_CHECKPOINT_PATH = EVAL_PAIRS_PATH.parent / "eval_checkpoint.json"
 
-    Calls the running API (/query) for each eval pair so the evaluator does
-    not conflict with the API's Qdrant file lock.
+
+def _collect_eval_rows(
+    eval_pairs_path: Path = EVAL_PAIRS_PATH,
+    checkpoint_path: Path = EVAL_CHECKPOINT_PATH,
+) -> dict[str, list]:
+    """Retrieve answers + contexts for every eval pair and cache to disk.
+
+    If ``checkpoint_path`` already exists it is loaded directly, skipping all
+    API calls.  Delete the file to force a fresh collection run.
 
     Args:
-        eval_pairs_path: Path to eval_pairs.json produced by generate_eval_pairs.
+        eval_pairs_path: Source eval pairs produced by ``--generate``.
+        checkpoint_path: Where to save/load the collected rows.
 
     Returns:
-        Dict of metric_name → mean score.
+        Dict with keys ``question``, ``answer``, ``contexts``, ``ground_truth``.
     """
-    from datasets import Dataset
-    from ragas import evaluate
-    from ragas.run_config import RunConfig
+    # ------------------------------------------------------------------ #
+    # Fast path: checkpoint already on disk
+    # ------------------------------------------------------------------ #
+    if checkpoint_path.exists():
+        logger.info(f"Loading eval checkpoint from {checkpoint_path} (skipping collection)")
+        with open(checkpoint_path, encoding="utf-8") as fh:
+            rows = json.load(fh)
+        logger.info(f"  Checkpoint contains {len(rows['question'])} rows")
+        return rows
 
-    cfg = load_config()
-
-    # Confirm API is reachable before starting the long loop
+    # ------------------------------------------------------------------ #
+    # Slow path: call the API for each question
+    # ------------------------------------------------------------------ #
     try:
         http_requests.get(f"{API_BASE}/health", timeout=5).raise_for_status()
     except Exception:
@@ -307,10 +507,7 @@ def run_ragas_eval(eval_pairs_path: Path = EVAL_PAIRS_PATH) -> dict:
     logger.info(f"Loaded {len(pairs)} eval pairs from {eval_pairs_path}")
 
     rows: dict[str, list] = {
-        "question": [],
-        "answer": [],
-        "contexts": [],
-        "ground_truth": [],
+        "question": [], "answer": [], "contexts": [], "ground_truth": []
     }
     total = len(pairs)
     for i, pair in enumerate(pairs):
@@ -323,21 +520,60 @@ def run_ragas_eval(eval_pairs_path: Path = EVAL_PAIRS_PATH) -> dict:
             rows["answer"].append(result["answer"])
             rows["contexts"].append(result["contexts"])
             rows["ground_truth"].append(ground_truth)
-        # Gemini Flash: 15 RPM → 1 req/4s is safe. No Groq calls here.
-        time.sleep(4)
+        time.sleep(4)   # stay within free-tier RPM
 
     if not rows["question"]:
         logger.error("No eval rows collected — check your pipeline.")
-        return {}
+        return rows
+
+    # Save checkpoint so scoring can be re-run without re-collecting.
+    checkpoint_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(checkpoint_path, "w", encoding="utf-8") as fh:
+        json.dump(rows, fh, indent=2)
+    logger.info(f"Checkpoint saved → {checkpoint_path}  ({len(rows['question'])} rows)")
+    return rows
+
+
+def _score_eval_rows(rows: dict[str, list]) -> dict[str, float]:
+    """Run RAGAS scoring on pre-collected rows and write results to disk.
+
+    Subsamples to ``_SCORE_SAMPLE`` rows (default 50) before scoring so the
+    run completes in a predictable time window:
+
+        50 rows × 4 metrics × 13 s/call (5-RPM rate limit) ≈ 44 minutes.
+
+    Uses ``max_workers=1`` so all judge calls go through the thread-safe
+    rate-limiter in ``_GeminiNoTemp`` without races.
+
+    Args:
+        rows: Dict produced by ``_collect_eval_rows``.
+
+    Returns:
+        Dict of metric_name → mean score.
+    """
+    from datasets import Dataset
+    from ragas import evaluate
+    from ragas.run_config import RunConfig
+    import random
+
+    cfg = load_config()
+
+    # Subsample for tractable runtime under the 5-RPM free-tier cap.
+    _SCORE_SAMPLE = 50
+    n = len(rows["question"])
+    if n > _SCORE_SAMPLE:
+        logger.info(f"Subsampling {_SCORE_SAMPLE}/{n} rows for RAGAS scoring")
+        indices = random.sample(range(n), _SCORE_SAMPLE)
+        rows = {k: [v[i] for i in indices] for k, v in rows.items()}
+    logger.info(f"Scoring {len(rows['question'])} rows with RAGAS")
 
     dataset = Dataset.from_dict(rows)
-
     judge_llm, judge_embeddings = _build_ragas_judges(cfg)
     metrics = _build_metrics(judge_llm, judge_embeddings)
 
-    # RunConfig: conservative workers + long timeout for Gemini free tier
-    run_cfg = RunConfig(max_workers=2, timeout=300, max_retries=5, max_wait=120)
-
+    # max_workers=1: serial execution so the class-level rate-limiter in
+    # _GeminiNoTemp is the single choke-point — no parallel 429 storms.
+    run_cfg = RunConfig(max_workers=1, timeout=180, max_retries=3, max_wait=60)
     result = evaluate(
         dataset=dataset,
         metrics=metrics,
@@ -345,7 +581,6 @@ def run_ragas_eval(eval_pairs_path: Path = EVAL_PAIRS_PATH) -> dict:
         raise_exceptions=False,
     )
 
-    # result is a dict-like object; extract numeric scores
     scores: dict[str, float] = {}
     for key, val in result.items():
         try:
@@ -364,6 +599,53 @@ def run_ragas_eval(eval_pairs_path: Path = EVAL_PAIRS_PATH) -> dict:
         result.to_pandas().to_csv(out_csv, index=False)
     except Exception as exc:
         logger.warning(f"Could not write CSV: {exc}")
+
+    print("\n--- RAGAS Evaluation Results ---")
+    for metric, score in scores.items():
+        print(f"  {metric:<30} {score:.4f}")
+    print(f"\nResults saved → {out_json}")
+    return scores
+
+
+def run_ragas_eval(eval_pairs_path: Path = EVAL_PAIRS_PATH) -> dict:
+    """Full pipeline: collect answers then run RAGAS scoring.
+
+    Saves a checkpoint after collection so ``--score`` can re-run scoring
+    independently without repeating API calls.
+
+    Args:
+        eval_pairs_path: Path to eval_pairs.json produced by ``--generate``.
+
+    Returns:
+        Dict of metric_name → mean score.
+    """
+    rows = _collect_eval_rows(eval_pairs_path)
+    if not rows["question"]:
+        return {}
+    return _score_eval_rows(rows)
+
+
+def run_ragas_score_only() -> dict:
+    """Re-run RAGAS scoring from the saved checkpoint (no API calls).
+
+    Use this after ``--eval`` completed collection but scoring failed.
+    Requires ``evals/eval_checkpoint.json`` to exist.
+
+    Returns:
+        Dict of metric_name → mean score.
+    """
+    if not EVAL_CHECKPOINT_PATH.exists():
+        print(
+            f"ERROR: Checkpoint not found at {EVAL_CHECKPOINT_PATH}.\n"
+            "Run  python evaluator.py --eval  first to collect data."
+        )
+        sys.exit(1)
+    logger.info(f"Loading checkpoint from {EVAL_CHECKPOINT_PATH}")
+    with open(EVAL_CHECKPOINT_PATH, encoding="utf-8") as fh:
+        rows = json.load(fh)
+    logger.info(f"  {len(rows['question'])} rows loaded — starting RAGAS scoring")
+    return _score_eval_rows(rows)
+
 
     print("\n--- RAGAS Evaluation Results ---")
     for metric, score in scores.items():
@@ -498,13 +780,25 @@ def run_ablation(eval_pairs_path: Path = EVAL_PAIRS_PATH) -> None:
 # ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="SBP RAG Evaluation Pipeline")
-    parser.add_argument("--generate", action="store_true", help="Generate eval pairs")
-    parser.add_argument("--eval",     action="store_true", help="Run RAGAS evaluation")
+    parser = argparse.ArgumentParser(
+        description="SBP RAG Evaluation Pipeline",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=(
+            "Typical workflow:\n"
+            "  1. python evaluator.py --generate          # build eval_pairs.json\n"
+            "  2. python evaluator.py --eval              # collect answers + score\n"
+            "     (if scoring fails, fix the judge and re-run without re-collecting)\n"
+            "  3. python evaluator.py --score             # re-score from checkpoint\n"
+            "  4. python evaluator.py --ablate            # ablation study\n"
+        ),
+    )
+    parser.add_argument("--generate", action="store_true", help="Generate eval pairs from chunks")
+    parser.add_argument("--eval",     action="store_true", help="Collect answers + run RAGAS scoring (saves checkpoint)")
+    parser.add_argument("--score",    action="store_true", help="Re-run RAGAS scoring from saved checkpoint (no API calls)")
     parser.add_argument("--ablate",   action="store_true", help="Run ablation study")
     args = parser.parse_args()
 
-    if not any([args.generate, args.eval, args.ablate]):
+    if not any([args.generate, args.eval, args.score, args.ablate]):
         parser.print_help()
         sys.exit(0)
 
@@ -526,6 +820,9 @@ if __name__ == "__main__":
             print(f"ERROR: {EVAL_PAIRS_PATH} not found. Run --generate first.")
             sys.exit(1)
         run_ragas_eval()
+
+    if args.score:
+        run_ragas_score_only()
 
     if args.ablate:
         if not EVAL_PAIRS_PATH.exists():
